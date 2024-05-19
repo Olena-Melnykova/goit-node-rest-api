@@ -13,3 +13,4 @@ const validateBody = (schema) => {
 };
 
 export default validateBody;
+
