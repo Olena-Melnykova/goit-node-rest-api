@@ -14,7 +14,6 @@ export const getOneContact = async (req, res) => {
   try {
     const { id } = req.params;
     const contactById = await Contact.findById(id);
-
     if (!contactById) {
       return res.status(404).json({ message: "Not found" });
     }
