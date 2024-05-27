@@ -7,6 +7,8 @@ import uploadMiddleware from "../middleware/upload.js";
 const router = express.Router();
 const jsonParser = express.json();
 
+router.get("/verify/:token", UserController.verify);
+router.post("/verify", jsonParser, UserController.resendVerificationEmail);
 router.post("/register", jsonParser, AuthController.register);
 router.post("/login", jsonParser, AuthController.login);
 router.post("/logout", authMiddleware, AuthController.logout);

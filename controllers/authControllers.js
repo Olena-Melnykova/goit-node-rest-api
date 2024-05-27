@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
 import User from "../models/userModel.js";
 import { registerSchema, loginSchema } from '../schemas/authSchemas.js';
+import mail from "../services/emailService.js";
 
 async function register(req, res, next) {
   const { email, password } = req.body;
@@ -23,11 +24,21 @@ async function register(req, res, next) {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const avatarURL = gravatar.url(emailInLowerCase, { s: '250', d: 'mm' });
+    const verificationToken = crypto.randomUUID()
 
     const newUser = await User.create({
       email: emailInLowerCase,
       password: passwordHash,
       avatarURL,
+      verificationToken,
+    });
+
+    mail.sendMail({
+      to: emailInLowerCase,
+      from: "elena88melnykova@gmail.com",
+      subject: "Welcome to Contact Book!",
+      html: `To confirm your email please click on the <a href="http://localhost:3000/api/users/verify/${verificationToken}">link</a>`,
+      text: `To confirm your email please open the link http://localhost:3000/api/users/verify/${verificationToken}`,
     });
 
     res.status(201).json({
@@ -62,6 +73,10 @@ async function login(req, res, next) {
 
     if (!isMatch) {
       return res.status(401).send({ message: "Email or password is wrong" });
+    }
+
+    if (user.verify === false) {
+      return res.status(401).send({ message: "Please verify your email" });
     }
 
     const token = jwt.sign(
